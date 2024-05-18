@@ -2,6 +2,10 @@ const calcularImposto = require("./calculo_imposto");
 const calcularInss = require("./calculo_inss");
 const calcularSalarioLiquido = require("./calculo_salario-liquido");
 const readline = require('readline')
+const fs = require('fs')
+const PDFDocument = require('pdfkit')
+
+const doc = new PDFDocument({ margin: 50, size: 'A4', fontSize: '12'})
 
 const input = readline.createInterface(
     process.stdin,
@@ -23,13 +27,20 @@ input.question ("Qual é seu nome?", (nomeDigitado) => {
             mes = mesDigitado;
             input.question("Qual é o seu salário bruto?", (salarioBrutoDigitado) =>{
                 salarioBruto = salarioBrutoDigitado;
-                console.log(`Nome: ${nome}`)
-                console.log(`CPF: ${cpf}`)
-                console.log(`Mês de pagamento: ${mes}`)
-                console.log(`Salário Bruto: R$ ${salarioBruto}`)
-                console.log(`Desconto INSS: R$ ${calcularInss(salarioBruto)}`)
-                console.log(`Imposto de Renda: R$ ${calcularImposto(salarioBruto)}`)
-                console.log(`Salário líquido: R$ ${calcularSalarioLiquido(salarioBruto)}`)
+                doc.pipe(fs.createWriteStream('folha_pagamento.pdf'))
+                doc.text("Folha de Pagamento")
+                doc.text("Data e geração:" + new Date())
+                doc.text(`Nome: ${nome}`)
+                doc.text(`CPF: ${cpf}`)
+                doc.text(`Mês de pagamento: ${mes}`)
+                doc.text("-------------------------")
+                doc.text(`Salário Bruto: R$ ${salarioBruto}`)
+                doc.text("-------------------------")
+                doc.text(`Desconto INSS: R$ ${calcularInss(salarioBruto)}`)
+                doc.text(`Imposto de Renda: R$ ${calcularImposto(salarioBruto)}`)
+                doc.text("-------------------------")
+                doc.text(`Salário líquido: R$ ${calcularSalarioLiquido(salarioBruto)}`)
+                doc.end()
                 input.close();
             });
         });
